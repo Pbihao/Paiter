@@ -18,6 +18,10 @@ def load(screen):
     root = tkinter.Tk()
     root.withdraw()
     file_path = filedialog.askopenfile(title = u'加载图片', initialdir = (os.path.expanduser(default_dir)))
+
+    if file_path == None:
+        return
+
     img = pygame.image.load(file_path.name).convert_alpha()
     size = [img.get_size()[0], img.get_size()[1]]
     if size[0] > size[1]:
@@ -39,7 +43,9 @@ def save(screen):
     file_name = filedialog.asksaveasfilename(title = u'保存图片', initialdir = (os.path.expanduser(default_dir)),
                                              filetypes = [("PNG", '.png'), ("BMP", '.bmp'), ("GIF", '.gif'),
                                                           ("JPG", '.jpg'), ("JPEG", '.jpeg')])
-
+    print(file_name)
+    if len(file_name) == 0:
+        return
     pygame.image.save(img, file_name)
 
 #给出对角线两点，返回左上点和长宽
