@@ -9,6 +9,7 @@ import os
 import cv2
 
 IMAGE_SIZE = pygame.Rect(100, 50, 1050, 900)
+IMAGE_SIZE2 = [1050, 900]
 
 #加载和保存图片
 default_dir = r"/home/pbihao/Pictures"
@@ -91,7 +92,14 @@ def cut(screen):
 #实现了一键清空功能
 def trash(screen):
     pygame.draw.rect(screen, COLOR_WHITE, IMAGE_SIZE, 1000)
-
+#调节图片的尺寸
+def resize(screen, sz):
+    rect = [IMAGE_SIZE[0] + 3, IMAGE_SIZE[1] + 3, IMAGE_SIZE[2] - 6, IMAGE_SIZE[3] - 6]
+    img = screen.subsurface(rect).copy()
+    rect = [IMAGE_SIZE2[0] + sz, IMAGE_SIZE2[1] + sz]
+    img = pygame.transform.scale(img, rect)
+    pygame.draw.rect(screen, COLOR_WHITE, IMAGE_SIZE, 2000)
+    screen.blit(img, IMAGE_SIZE.topleft)
 
 #实现了画笔的基本功能，至于橡皮擦其实就是白色的画笔
 class Pen(object):
@@ -161,6 +169,8 @@ class Menu:
         self.rect_save = pygame.Rect(SPACE, 544 + BIG_SIZE + SPACE, BIG_SIZE, BIG_SIZE)
         self.rect_cut = pygame.Rect(SPACE, 544 + (BIG_SIZE + SPACE) * 2, BIG_SIZE, BIG_SIZE)
         self.rect_trash = pygame.Rect(SPACE, 544 + (BIG_SIZE + SPACE) * 3, BIG_SIZE, BIG_SIZE)
+        self.rect_smaller = pygame.Rect(SPACE, 544 + (BIG_SIZE + SPACE) * 4, SMALL_SIZE, SMALL_SIZE)
+        self.rect_bigger = pygame.Rect(SPACE + SMALL_SIZE, 544 + (BIG_SIZE + SPACE) * 4, SMALL_SIZE, SMALL_SIZE)
 
         self.i_pen = pygame.image.load("images/pen.png").convert_alpha()
         self.i_eraser = pygame.image.load("images/eraser.png").convert_alpha()
@@ -170,6 +180,8 @@ class Menu:
         self.i_save = pygame.image.load("images/save.png").convert_alpha()
         self.i_cut = pygame.image.load("images/cut.png").convert_alpha()
         self.i_trash = pygame.image.load("images/trash.png").convert_alpha()
+        self.i_smaller = pygame.image.load("images/smaller.png").convert_alpha()
+        self.i_bigger = pygame.image.load("images/bigger.png").convert_alpha()
 
     def set_pen(self, pen):
         self.pen = pen
@@ -194,6 +206,8 @@ class Menu:
         self.screen.blit(self.i_save, self.rect_save.topleft)
         self.screen.blit(self.i_cut, self.rect_cut.topleft)
         self.screen.blit(self.i_trash, self.rect_trash.topleft)
+        self.screen.blit(self.i_smaller, self.rect_smaller.topleft)
+        self.screen.blit(self.i_bigger, self.rect_bigger.topleft)
     def click_button(self, pos):
         if self.rect_pen.collidepoint(pos):
             self.pen.to_pen()
@@ -223,6 +237,12 @@ class Menu:
             return
         if self.rect_trash.collidepoint(pos):
             trash(self.screen)
+            return
+        if self.rect_smaller.collidepoint(pos):
+            resize(self.screen, -50)
+            return
+        if self.rect_bigger.collidepoint(pos):
+            resize(self.screen, 50)
             return
 
 
