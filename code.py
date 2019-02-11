@@ -13,13 +13,24 @@ IMAGE_SIZE = pygame.Rect(100, 50, 1050, 900)
 #加载和保存图片
 default_dir = r"/home/pbihao/Pictures"
 def load(screen):
+    pygame.draw.rect(screen, COLOR_WHITE, IMAGE_SIZE, 2000)
     root = tkinter.Tk()
     root.withdraw()
     file_path = filedialog.askopenfile(title = u'加载图片', initialdir = (os.path.expanduser(default_dir)))
     img = pygame.image.load(file_path.name).convert_alpha()
+    size = [img.get_size()[0], img.get_size()[1]]
+    if size[0] > size[1]:
+        size[1] = size[1] / size[0] * 900
+        size[0] = 1050
+    else:
+        size[0] = size[0] / size[1] * 1050
+        size[1] = 900
+    size[0] = int(size[0])
+    size[1] = int(size[1])
+    img = pygame.transform.scale(img, size)
     screen.blit(img, IMAGE_SIZE.topleft)
-#可改进：在加载图片以后可以根据画板的大小来对图片进行调节
-#至于为什么我自己不做呢？懒
+
+#加载图片时会调整图片大小
 def save(screen):
     root = tkinter.Tk()
     root.withdraw()
