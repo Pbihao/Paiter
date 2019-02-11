@@ -76,9 +76,10 @@ def cut(screen):
 
                 pygame.display.update()
                 return
-
-
         pygame.display.update()
+#实现了一键清空功能
+def trash(screen):
+    pygame.draw.rect(screen, COLOR_WHITE, IMAGE_SIZE, 1000)
 
 
 #实现了画笔的基本功能，至于橡皮擦其实就是白色的画笔
@@ -148,7 +149,7 @@ class Menu:
         self.rect_load = pygame.Rect(SPACE, 544, BIG_SIZE, BIG_SIZE)
         self.rect_save = pygame.Rect(SPACE, 544 + BIG_SIZE + SPACE, BIG_SIZE, BIG_SIZE)
         self.rect_cut = pygame.Rect(SPACE, 544 + (BIG_SIZE + SPACE) * 2, BIG_SIZE, BIG_SIZE)
-
+        self.rect_trash = pygame.Rect(SPACE, 544 + (BIG_SIZE + SPACE) * 3, BIG_SIZE, BIG_SIZE)
 
         self.i_pen = pygame.image.load("images/pen.png").convert_alpha()
         self.i_eraser = pygame.image.load("images/eraser.png").convert_alpha()
@@ -157,6 +158,7 @@ class Menu:
         self.i_load = pygame.image.load("images/load.png").convert_alpha()
         self.i_save = pygame.image.load("images/save.png").convert_alpha()
         self.i_cut = pygame.image.load("images/cut.png").convert_alpha()
+        self.i_trash = pygame.image.load("images/trash.png").convert_alpha()
 
     def set_pen(self, pen):
         self.pen = pen
@@ -180,6 +182,7 @@ class Menu:
         self.screen.blit(self.i_load, self.rect_load.topleft)
         self.screen.blit(self.i_save, self.rect_save.topleft)
         self.screen.blit(self.i_cut, self.rect_cut.topleft)
+        self.screen.blit(self.i_trash, self.rect_trash.topleft)
     def click_button(self, pos):
         if self.rect_pen.collidepoint(pos):
             self.pen.to_pen()
@@ -206,6 +209,9 @@ class Menu:
             return
         if self.rect_cut.collidepoint(pos):
             cut(self.screen)
+            return
+        if self.rect_trash.collidepoint(pos):
+            trash(self.screen)
             return
 
 
