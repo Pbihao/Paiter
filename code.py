@@ -10,8 +10,7 @@ import cv2
 
 IMAGE_SIZE = pygame.Rect(100, 50, 1050, 900)
 
-#返回弹出窗口用户选择的文件完整路径
-#可改进：在加载的时候调整图片的大小，懒
+#加载和保存图片
 default_dir = r"/home/pbihao/Pictures"
 def load(screen):
     root = tkinter.Tk()
@@ -19,6 +18,8 @@ def load(screen):
     file_path = filedialog.askopenfile(title = u'加载图片', initialdir = (os.path.expanduser(default_dir)))
     img = pygame.image.load(file_path.name).convert_alpha()
     screen.blit(img, IMAGE_SIZE.topleft)
+#可改进：在加载图片以后可以根据画板的大小来对图片进行调节
+#至于为什么我自己不做呢？懒
 def save(screen):
     root = tkinter.Tk()
     root.withdraw()
@@ -28,6 +29,57 @@ def save(screen):
                                                           ("JPG", '.jpg'), ("JPEG", '.jpeg')])
 
     pygame.image.save(img, file_name)
+
+#给出对角线两点，返回左上点和长宽
+def calc_rect(p1, p2):
+    ans = []
+    ans.append(min(p1[0], p2[0]))
+    ans.append(min(p1[1], p2[1]))
+    ans.append(abs(p1[0] - p2[0]))
+    ans.append(abs(p1[1] - p2[1]))
+    return ans
+
+def cut(screen):
+    img = screen.subsurface(IMAGE_SIZE).copy()
+    bg = None
+    while True:
+        pygame.time.Clock().tick(30)
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                return
+            if event.type == MOUSEBUTTONDOWN:
+                if not IMAGE_SIZE.collidepoint(event.pos):
+                    return
+                elif bg == None:
+                    bg = event.pos
+            elif event.type == MOUSEMOTION:
+                if bg == None:
+                    continue
+                screen.blit(img, IMAGE_SIZE.topleft)
+                ans = calc_rect(bg, event.pos)
+                rect = pygame.Rect(ans[0], ans[1], ans[2], ans[3])
+                pygame.draw.rect(screen,COLOR_BLACK,rect,1)
+            elif event.type == MOUSEBUTTONUP:
+                if bg == None:
+                    continue
+                screen.blit(img, IMAGE_SIZE.topleft)
+                ans = calc_rect(bg, event.pos)
+                rect = pygame.Rect(ans[0], ans[1], ans[2], ans[3])
+                pygame.draw.rect(screen, COLOR_BLACK, rect, 1)
+                dst = screen.subsurface(rect).copy()
+                pygame.draw.rect(screen, COLOR_WHITE, IMAGE_SIZE, 1000)
+
+                screen.blit(dst, IMAGE_SIZE.topleft)
+                rect[0] = IMAGE_SIZE.topleft[0]
+                rect[1] = IMAGE_SIZE.topleft[1]
+                pygame.draw.rect(screen, COLOR_WHITE, rect, 1)
+
+                pygame.display.update()
+                return
+
+
+        pygame.display.update()
+
 
 #实现了画笔的基本功能，至于橡皮擦其实就是白色的画笔
 class Pen(object):
@@ -94,8 +146,8 @@ class Menu:
                            for i in range(16)]
 
         self.rect_load = pygame.Rect(SPACE, 544, BIG_SIZE, BIG_SIZE)
-        self.rect_save = pygame.Rect(SPACE, 544 + BIG_SIZE, BIG_SIZE + SPACE, BIG_SIZE)
-
+        self.rect_save = pygame.Rect(SPACE, 544 + BIG_SIZE + SPACE, BIG_SIZE, BIG_SIZE)
+        self.rect_cut = pygame.Rect(SPACE, 544 + (BIG_SIZE + SPACE) * 2, BIG_SIZE, BIG_SIZE)
 
 
         self.i_pen = pygame.image.load("images/pen.png").convert_alpha()
@@ -104,6 +156,7 @@ class Menu:
                       pygame.image.load("images/small.png").convert_alpha()]
         self.i_load = pygame.image.load("images/load.png").convert_alpha()
         self.i_save = pygame.image.load("images/save.png").convert_alpha()
+        self.i_cut = pygame.image.load("images/cut.png").convert_alpha()
 
     def set_pen(self, pen):
         self.pen = pen
@@ -126,7 +179,7 @@ class Menu:
             pygame.draw.rect(self.screen, COLORS[i], self.rect_color[i])
         self.screen.blit(self.i_load, self.rect_load.topleft)
         self.screen.blit(self.i_save, self.rect_save.topleft)
-
+        self.screen.blit(self.i_cut, self.rect_cut.topleft)
     def click_button(self, pos):
         if self.rect_pen.collidepoint(pos):
             self.pen.to_pen()
@@ -150,6 +203,9 @@ class Menu:
             return
         if self.rect_save.collidepoint(pos):
             save(self.screen)
+            return
+        if self.rect_cut.collidepoint(pos):
+            cut(self.screen)
             return
 
 
